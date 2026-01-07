@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useForm, Controller } from "react-hook-form";
@@ -40,7 +40,7 @@ const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
  * Form for creating or editing a journal entry.
  * Handles auto-saving drafts, rich text editing, and collection assignment.
  */
-export default function JournalEntryPage() {
+function JournalEntryContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams.get("edit");
@@ -368,5 +368,13 @@ export default function JournalEntryPage() {
         setOpen={setIsCollectionDialogOpen}
       />
     </div>
+  );
+}
+
+export default function JournalEntryPage() {
+  return (
+    <Suspense fallback={<BarLoader className="mb-4" width={"100%"} color="#f59e0b" />}>
+      <JournalEntryContent />
+    </Suspense>
   );
 }
