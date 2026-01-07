@@ -31,11 +31,15 @@ export default async function RootLayout({ children }) {
   try {
     decision = await aj.protect();
   } catch (error) {
-    console.error("Arcjet protection failed:", error);
-    // Fail open or closed? Fail open for build safety, or handle specifically.
-    // Given the error "undefined reading headers", it's likely a build-time artifact.
-    // We treat it as allowed.
-    decision = { isDenied: () => false };
+    // Arcjet protection attempts to read request headers, which aren't available during
+    // Next.js static build generation. This is expected behavior for static pages.
+    // We strictly ignore this specific error to avoid noisy build logs.
+    if (error?.message?.includes('headers')) {
+      decision = { isDenied: () => false };
+    } else {
+      console.error("Arcjet protection failed:", error);
+      decision = { isDenied: () => false };
+    }
   }
 
   if (decision.isDenied()) {
