@@ -1,4 +1,4 @@
-import arcjet, { createMiddleware, detectBot, shield } from '@arcjet/next';
+import arcjet, { detectBot, shield } from '@arcjet/next';
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
@@ -24,15 +24,26 @@ const aj = arcjet({
 })
 
 
-const clerk = clerkMiddleware(async (auth, req) => {
+
+export default clerkMiddleware(async (auth, req) => {
   const { userId, redirectToSignIn } = await auth();
+
   if (!userId && isProtectedRoute(req)) {
     return redirectToSignIn();
   }
+
+  // Shield and Bot detection
+  const decision = await aj.protect(req);
+
+  if (decision.isDenied()) {
+    if (decision.reason.isBot()) {
+      return NextResponse.json({ error: "Boop beep bop" }, { status: 403 });
+    }
+    return NextResponse.json({ error: "Access denied" }, { status: 403 });
+  }
+
   return NextResponse.next();
 });
-
-export default createMiddleware(aj, clerk);
 
 export const config = {
   matcher: [
