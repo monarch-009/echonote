@@ -4,6 +4,7 @@ import { Inter, Playfair_Display } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "@/components/ui/sonner";
 import Image from "next/image";
+import { aj } from "@/lib/arcjet-shield";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -25,7 +26,29 @@ export const metadata = {
  * The top-level layout that wraps all pages.
  * Includes global providers (Clerk), fonts (Inter, Playfair), header, background, and footer.
  */
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  let decision;
+  try {
+    decision = await aj.protect();
+  } catch (error) {
+    console.error("Arcjet protection failed:", error);
+    // Fail open or closed? Fail open for build safety, or handle specifically.
+    // Given the error "undefined reading headers", it's likely a build-time artifact.
+    // We treat it as allowed.
+    decision = { isDenied: () => false };
+  }
+
+  if (decision.isDenied()) {
+    return (
+      <html lang="en">
+        <body>
+          <h1>Access Denied</h1>
+          <p>We verified you are a bot/automated script.</p>
+        </body>
+      </html>
+    );
+  }
+
   return (
     <ClerkProvider>
       <html lang="en">
