@@ -89,7 +89,7 @@ export default async function RootLayout({ children }) {
             <footer className="bg-gradient-to-r from-amber-900/95 via-orange-900/95 to-amber-900/95 backdrop-blur-md py-12 mt-12 border-t border-amber-700/30 shadow-lg">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <p className="text-base text-amber-100/90 font-semibold tracking-wide">
-                  © 2025 EchoNote. Designed for Reflection.
+                  © 2025 EchoNote. Designed for Reflection by monarch_009
                 </p>
               </div>
             </footer>
